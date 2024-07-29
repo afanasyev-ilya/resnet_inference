@@ -17,6 +17,14 @@ python3 ./verify_model.py
 **3. Create TensorRT engine**
 
 ```
+make data/ResNet50_int8.engine
+make data/ResNet50_fp16.engine
+make data/ResNet50_fp32.engine
+```
+
+or manually:
+
+```
 cd resnet
 ../bin/trtexec --onnx=data/ResNet50.onnx --saveEngine=data/ResNet50_fp32.engine
 ../bin/trtexec --onnx=data/ResNet50.onnx --saveEngine=ResNet50_fp16.engine --fp16

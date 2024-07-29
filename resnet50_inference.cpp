@@ -135,7 +135,8 @@ void printTopLabels(const std::vector<float>& scores, const int topN = NUM_RUNS)
 int main(int argc, char **argv) {
     cxxopts::Options options("ResNet50Inference", "ResNet50 inference using TensorRT with FP16 or FP32 precision");
     options.add_options()
-        ("f,fp16", "Enable FP16 precision")
+        ("8,int8", "Enable INT8 precision")
+        ("16,fp16", "Enable FP16 precision")
         ("32,fp32", "Enable FP32 precision (default)")
         ("e,engine", "Path to TensorRT engine file", cxxopts::value<std::string>())
         ("i,image", "Path to input image", cxxopts::value<std::string>())
@@ -148,15 +149,36 @@ int main(int argc, char **argv) {
         return 0;
     }
 
+    // Determine precision
     bool useFP16 = result.count("fp16") > 0;
-    std::string engineFile = result.count("engine") ? result["engine"].as<std::string>() : (useFP16 ? "data/ResNet50_fp16.engine" : "data/ResNet50_fp32.engine");
-    std::string imagePath = result.count("image") ? result["image"].as<std::string>() : "data/binoculars.jpeg";
+    bool useINT8 = result.count("int8") > 0;
+    
+    // Check for conflicting precision options
+    if (useFP16 && useINT8) {
+        std::cerr << "Error: Cannot use both FP16 and INT8 precision at the same time." << std::endl;
+        return 1;
+    }
+
+    // Default to FP32 if neither FP16 nor INT8 is specified
+    std::string engineFile;
+    if (useINT8) {
+        engineFile = result.count("engine") ? result["engine"].as<std::string>() : "data/ResNet50_int8.engine";
+    } else if (useFP16) {
+        engineFile = result.count("engine") ? result["engine"].as<std::string>() : "data/ResNet50_fp16.engine";
+    } else {
+        engineFile = result.count("engine") ? result["engine"].as<std::string>() : "data/ResNet50_fp32.engine";
+    }
 
     if(useFP16) {
         std::cout << "using FP16\n";
+    } else if(useINT8) {
+        std::cout << "using INT8\n";
     } else {
         std::cout << "using FP32\n";
     }
+
+    // get image path
+    std::string imagePath = result.count("image") ? result["image"].as<std::string>() : "data/binoculars.jpeg";
 
     Logger logger;
 

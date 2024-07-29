@@ -15,6 +15,7 @@ TRTEXEC = ../bin/trtexec
 ONNX_MODEL = data/ResNet50.onnx
 ENGINE_FP32 = data/ResNet50_fp32.engine
 ENGINE_FP16 = data/ResNet50_fp16.engine
+ENGINE_INT8 = data/ResNet50_int8.engine
 
 # cxxopts repository
 CXXOPTS_REPO = https://github.com/jarro2783/cxxopts.git
@@ -52,6 +53,9 @@ $(ENGINE_FP32): $(ONNX_MODEL)
 $(ENGINE_FP16): $(ONNX_MODEL)
 	$(TRTEXEC) --onnx=$(ONNX_MODEL) --saveEngine=$(ENGINE_FP16) --fp16
 
+$(ENGINE_INT8): $(ONNX_MODEL)
+	$(TRTEXEC) --onnx=$(ONNX_MODEL) --saveEngine=$(ENGINE_INT8) --int8
+
 # Build all targets, including engines
 build_all: $(ENGINE_FP32) $(ENGINE_FP16) $(TARGET)
 
@@ -60,6 +64,6 @@ clean:
 	rm -f $(TARGET) $(OBJS)
 	rm -rf cxxopts
 	rm -rf $(OBJDIR)
-	rm -f $(ENGINE_FP32) $(ENGINE_FP16)
+	rm -f $(ENGINE_FP32) $(ENGINE_FP16) $(ENGINE_INT8)
 
 .PHONY: all clean submodule build_all
