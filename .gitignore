@@ -1,0 +1,4 @@
+data/*.engine
+*.bin
+*.o
+obj/*.o
